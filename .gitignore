@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+
+# Compilacion de .NET
+bin/
+obj/

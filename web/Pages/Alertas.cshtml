@@ -1,0 +1,30 @@
+@page
+@model AlertasModel
+@{ ViewData["Title"] = "Alertas"; }
+
+<h1>Alertas pendientes</h1>
+
+<div class="panel">
+    <form method="post" asp-page-handler="Todas" class="linea" style="justify-content:space-between;margin-bottom:10px">
+        <span>@Model.Total alertas pendientes (mostrando @Model.Alertas.Count, las mas recientes y criticas primero). Las generan los disparadores al registrar lecturas.</span>
+        <button>Atender todas (UPDATE)</button>
+    </form>
+    <table>
+        <tr><th>Hora</th><th>Sensor</th><th>Dispositivo</th><th>Severidad</th><th class="num">Valor</th><th class="num">Umbral</th><th></th></tr>
+        @foreach (var a in Model.Alertas)
+        {
+            <tr>
+                <td>@a.Hora</td><td>@a.Sensor</td><td>@a.Dispositivo</td>
+                <td><span class="etiqueta @a.Severidad">@a.Severidad</span></td>
+                <td class="num">@a.Valor.ToString("0.00")</td><td class="num">@a.Umbral.ToString("0.00")</td>
+                <td>
+                    <form method="post" asp-page-handler="Atender">
+                        <input type="hidden" name="id" value="@a.Id" />
+                        <button class="chico">Atender</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.Alertas.Count == 0) { <tr><td colspan="7">No hay alertas pendientes.</td></tr> }
+    </table>
+</div>

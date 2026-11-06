@@ -1,0 +1,32 @@
+:root { --azul: #1f3a68; --fondo: #f4f6f9; --borde: #d7dde8; --rojo: #b42318; --naranja: #c26a00; --verde: #1f7a3d; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Segoe UI, Arial, sans-serif; background: var(--fondo); color: #1d2433; }
+.contenedor { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+header { background: var(--azul); color: #fff; }
+.barra { display: flex; justify-content: space-between; align-items: center; height: 56px; }
+.marca { font-weight: 700; } .marca span { font-weight: 400; opacity: .8; }
+nav a { color: #fff; margin-left: 18px; text-decoration: none; } nav a:hover { text-decoration: underline; }
+main { padding-top: 20px; padding-bottom: 20px; }
+h1 { font-size: 22px; margin: 8px 0 16px; text-align: center; } h2 { font-size: 17px; margin: 0 0 10px; }
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: 12px; text-align: center; }
+.tarjeta b { display: block; font-size: 26px; color: var(--azul); } .tarjeta small { color: #5b6475; }
+.panel { background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: 16px; margin-bottom: 18px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--azul); color: #fff; text-align: left; padding: 7px 8px; font-weight: 600; }
+td { padding: 6px 8px; border-bottom: 1px solid var(--borde); } tr:nth-child(even) td { background: #f8fafc; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+form.linea { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+label { display: flex; flex-direction: column; font-size: 12px; color: #5b6475; gap: 3px; }
+input, select { padding: 6px 8px; border: 1px solid var(--borde); border-radius: 6px; font-size: 14px; }
+button { padding: 7px 14px; border: 0; border-radius: 6px; background: var(--azul); color: #fff; cursor: pointer; font-size: 14px; }
+button.peligro { background: var(--rojo); } button.chico { padding: 4px 10px; font-size: 12px; }
+.aviso { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; }
+.aviso.ok { background: #dcf3e3; color: var(--verde); } .aviso.error { background: #fde2e2; color: var(--rojo); }
+.etiqueta { padding: 2px 8px; border-radius: 10px; font-size: 12px; color: #fff; }
+.critica { background: var(--rojo); } .advertencia { background: var(--naranja); } .normal { background: var(--verde); }
+.activo { background: var(--verde); } .mantenimiento { background: #2f6fd1; } .inactivo { background: #6b7280; }
+.sobre { color: var(--rojo); font-weight: 700; }
+code, pre { font-family: Consolas, monospace; font-size: 12px; } pre { background: #f2f2f2; padding: 10px; white-space: pre-wrap; }
+footer { color: #6b7280; font-size: 12px; text-align: center; padding-bottom: 20px; }
+a { color: var(--azul); }

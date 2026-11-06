@@ -1,0 +1,69 @@
+# Tarea 11 · ADO.NET con C# y Visual Basic · IoT Analytics Dashboard (NexoDev Solutions)
+name: iot-adonet
+
+services:
+  # ================= BASE DE DATOS =================
+  datos:
+    image: postgres:16
+    container_name: adonet-datos
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin123}
+      POSTGRES_DB: iotanalytics
+    command: >
+      -c ssl=on -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+      -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+    volumes:
+      - ./datos/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks: [red-datos]          # sin puerto expuesto a la PC
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d iotanalytics"]
+      interval: 3s
+      retries: 30
+
+  # ========= CLIENTE ADO.NET EN C#: interfaz grafica web + simulador =========
+  web:
+    build: ./web
+    container_name: adonet-web
+    environment:
+      ConnectionStrings__Iot: >-
+        Host=datos;Database=iotanalytics;Username=app_adonet;Password=adonet123;
+        SSL Mode=Require;Application Name=web-csharp;Timezone=America/Mexico_City
+      SIMULADOR: "true"
+    ports:
+      - "8091:8080"                # http://localhost:8091
+    networks: [red-datos]
+    depends_on:
+      datos: { condition: service_healthy }
+
+  # ========= CLIENTE ADO.NET EN VISUAL BASIC: modelo desconectado =========
+  vb:
+    build: ./vb
+    container_name: adonet-vb
+    environment:
+      ConnectionStrings__Iot: >-
+        Host=datos;Database=iotanalytics;Username=app_adonet;Password=adonet123;
+        SSL Mode=Require;Application Name=reporte-vb;Timezone=America/Mexico_City
+    networks: [red-datos]
+    depends_on:
+      datos: { condition: service_healthy }
+
+  # ================= VISUALIZACION =================
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: adonet-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/iot-adonet.json
+    ports:
+      - "3011:3000"                # http://localhost:3011
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks: [red-datos]
+    depends_on:
+      datos: { condition: service_healthy }
+
+networks:
+  red-datos:

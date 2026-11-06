@@ -1,0 +1,68 @@
+@page
+@model IndexModel
+@{ ViewData["Title"] = "Sensores"; }
+
+<h1>Sensores IoT</h1>
+
+<div class="tarjetas">
+    <div class="tarjeta"><b>@Model.Resumen.Lecturas.ToString("N0")</b><small>lecturas totales</small></div>
+    <div class="tarjeta"><b>@Model.Resumen.UltimoMinuto</b><small>lecturas en el ultimo minuto</small></div>
+    <div class="tarjeta"><b>@Model.Resumen.AlertasPendientes</b><small>alertas pendientes (@Model.Resumen.Criticas criticas)</small></div>
+    <div class="tarjeta"><b>@Model.Resumen.DispositivosActivos</b><small>dispositivos activos</small></div>
+    <div class="tarjeta"><b>@Model.Resumen.Sensores</b><small>sensores</small></div>
+</div>
+
+<div class="panel">
+    <h2>Nuevo sensor (INSERT ... RETURNING con ExecuteScalar)</h2>
+    <form method="post" asp-page-handler="Crear" class="linea">
+        <label>Codigo <input name="codigo" required maxlength="20" placeholder="EMB02-HUM" /></label>
+        <label>Dispositivo
+            <select name="dispositivo">
+                @foreach (var d in Model.Dispositivos) { <option value="@d.Codigo">@d.Codigo · @d.Nombre</option> }
+            </select>
+        </label>
+        <label>Tipo (define la unidad)
+            <select name="tipo" required>
+                <option value="" selected disabled>Elige el tipo</option>
+                @foreach (var (tipo, unidad) in RepositorioIot.UnidadPorTipo)
+                {
+                    <option value="@tipo">@tipo (@unidad)</option>
+                }
+            </select>
+        </label>
+        <label>Umbral <input name="umbral" type="number" step="0.01" required size="8" /></label>
+        <button>Crear</button>
+    </form>
+</div>
+
+<div class="panel">
+    <h2>Sensores y su ultima lectura (DataReader)</h2>
+    <table>
+        <tr><th>Sensor</th><th>Tipo</th><th>Dispositivo</th><th>Estado</th><th class="num">Umbral</th><th class="num">Ultimo valor</th><th>Hora</th><th></th></tr>
+        @foreach (var s in Model.Sensores)
+        {
+            <tr>
+                <td><a asp-page="/Sensor" asp-route-codigo="@s.Codigo">@s.Codigo</a></td>
+                <td>@s.Tipo</td>
+                <td>@s.Dispositivo</td>
+                <td><span class="etiqueta @s.Estado">@s.Estado</span></td>
+                <td class="num">@s.Umbral.ToString("0.00") @s.Unidad</td>
+                <td class="num @(s.UltimoValor > s.Umbral ? "sobre" : "")">@(s.UltimoValor?.ToString("0.00") ?? "sin lecturas")</td>
+                <td>@(s.Hora ?? "-")</td>
+                <td><a asp-page="/Sensor" asp-route-codigo="@s.Codigo">Administrar</a></td>
+            </tr>
+        }
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Ultimos cambios (auditoria por disparador)</h2>
+    <table>
+        <tr><th>Hora</th><th>Tabla</th><th>Operacion</th><th>Registro</th><th>Cambios</th><th>Aplicacion</th></tr>
+        @foreach (var a in Model.Auditoria)
+        {
+            <tr><td>@a.Hora</td><td>@a.Tabla</td><td>@a.Operacion</td><td>@a.Registro</td><td><code>@a.Cambios</code></td><td>@a.App</td></tr>
+        }
+        @if (Model.Auditoria.Count == 0) { <tr><td colspan="6">Sin cambios todavia.</td></tr> }
+    </table>
+</div>

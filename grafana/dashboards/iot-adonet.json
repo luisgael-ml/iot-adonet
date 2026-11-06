@@ -1,0 +1,573 @@
+{
+  "uid": "iot-adonet",
+  "title": "IoT Analytics Dashboard · ADO.NET",
+  "tags": [
+    "nexodev",
+    "tarea11"
+  ],
+  "timezone": "browser",
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Lecturas en el ultimo minuto",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) FROM lecturas WHERE medido_en > NOW() - INTERVAL '1 minute'"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Alertas pendientes",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) FROM alertas WHERE NOT atendida"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Sensores registrados",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) FROM sensores"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Cambios hechos desde ADO.NET (hoy)",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) FROM auditoria WHERE ocurrido_en > date_trunc('day', NOW())"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Temperatura por minuto",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', l.medido_en) AS time, s.codigo AS metric, ROUND(AVG(l.valor), 2) AS value\nFROM lecturas l JOIN sensores s ON s.id = l.sensor_id\nWHERE s.tipo = 'temperatura' AND $__timeFilter(l.medido_en)\nGROUP BY 1, 2 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Vibracion por minuto",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 4,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', l.medido_en) AS time, s.codigo AS metric, ROUND(AVG(l.valor), 2) AS value\nFROM lecturas l JOIN sensores s ON s.id = l.sensor_id\nWHERE s.tipo = 'vibracion' AND $__timeFilter(l.medido_en)\nGROUP BY 1, 2 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "mm/s",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Energia por minuto",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 4,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', l.medido_en) AS time, s.codigo AS metric, ROUND(AVG(l.valor), 2) AS value\nFROM lecturas l JOIN sensores s ON s.id = l.sensor_id\nWHERE s.tipo = 'energia' AND $__timeFilter(l.medido_en)\nGROUP BY 1, 2 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "table",
+      "title": "Sensores y ultima lectura",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT s.codigo AS sensor, s.tipo, s.umbral_max AS umbral, u.valor AS \"ultimo valor\", to_char(u.medido_en, 'HH24:MI:SS') AS hora\nFROM sensores s LEFT JOIN LATERAL (SELECT valor, medido_en FROM lecturas l WHERE l.sensor_id = s.id ORDER BY medido_en DESC LIMIT 1) u ON TRUE\nORDER BY s.codigo"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Alertas recientes",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT to_char(a.creada_en, 'HH24:MI:SS') AS hora, s.codigo AS sensor, a.severidad, a.valor, a.umbral,\n       CASE WHEN a.atendida THEN 'si' ELSE 'no' END AS atendida\nFROM alertas a JOIN sensores s ON s.id = a.sensor_id ORDER BY a.id DESC LIMIT 15"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severidad"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "INSERT": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "UPDATE": {
+                        "color": "blue",
+                        "index": 1
+                      },
+                      "DELETE": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "web-csharp": {
+                        "color": "purple",
+                        "index": 3
+                      },
+                      "reporte-vb": {
+                        "color": "orange",
+                        "index": 4
+                      },
+                      "critica": {
+                        "color": "red",
+                        "index": 5
+                      },
+                      "advertencia": {
+                        "color": "orange",
+                        "index": 6
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Operaciones CRUD registradas por la auditoria (web C# y reporte VB)",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "iot-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "iot-pg"
+          },
+          "rawQuery": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawSql": "SELECT to_char(ocurrido_en, 'HH24:MI:SS') AS hora, aplicacion, tabla, operacion, registro,\n       CASE WHEN operacion = 'UPDATE' THEN cambios::text ELSE '' END AS cambios\nFROM auditoria ORDER BY id DESC LIMIT 15"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "operacion"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "INSERT": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "UPDATE": {
+                        "color": "blue",
+                        "index": 1
+                      },
+                      "DELETE": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "web-csharp": {
+                        "color": "purple",
+                        "index": 3
+                      },
+                      "reporte-vb": {
+                        "color": "orange",
+                        "index": 4
+                      },
+                      "critica": {
+                        "color": "red",
+                        "index": 5
+                      },
+                      "advertencia": {
+                        "color": "orange",
+                        "index": 6
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "aplicacion"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "INSERT": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "UPDATE": {
+                        "color": "blue",
+                        "index": 1
+                      },
+                      "DELETE": {
+                        "color": "red",
+                        "index": 2
+                      },
+                      "web-csharp": {
+                        "color": "purple",
+                        "index": 3
+                      },
+                      "reporte-vb": {
+                        "color": "orange",
+                        "index": 4
+                      },
+                      "critica": {
+                        "color": "red",
+                        "index": 5
+                      },
+                      "advertencia": {
+                        "color": "orange",
+                        "index": 6
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

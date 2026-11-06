@@ -1,0 +1,32 @@
+@page
+@model RendimientoModel
+@{ ViewData["Title"] = "Rendimiento"; }
+
+<h1>Prueba de rendimiento</h1>
+
+<div class="panel">
+    <p>Inserta lecturas de PRE03-VIB de cuatro formas con ADO.NET y las elimina al terminar.</p>
+    <form method="post" class="linea">
+        <label>Cantidad de lecturas <input name="cantidad" type="number" value="@Model.Cantidad" min="10" max="5000" /></label>
+        <button>Ejecutar</button>
+    </form>
+</div>
+
+@if (Model.Resultados.Count > 0)
+{
+    <div class="panel">
+        <h2>Resultados con @Model.Cantidad lecturas</h2>
+        <table>
+            <tr><th>Forma</th><th class="num">Total (ms)</th><th class="num">Por lectura (ms)</th><th class="num">Veces mas rapida que A</th></tr>
+            @foreach (var r in Model.Resultados)
+            {
+                <tr>
+                    <td>@r.Forma</td>
+                    <td class="num">@r.Ms.ToString("N1")</td>
+                    <td class="num">@((r.Ms / Model.Cantidad).ToString("N3"))</td>
+                    <td class="num">@((Model.Resultados[0].Ms / r.Ms).ToString("N1"))</td>
+                </tr>
+            }
+        </table>
+    </div>
+}

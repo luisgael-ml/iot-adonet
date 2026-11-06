@@ -1,0 +1,54 @@
+@page
+@model SensorModel
+@{ var s = Model.Sensor!; ViewData["Title"] = s.Codigo; }
+
+<h1>Sensor @s.Codigo</h1>
+
+<div class="tarjetas">
+    <div class="tarjeta"><b>@s.Tipo</b><small>tipo</small></div>
+    <div class="tarjeta"><b>@s.Dispositivo</b><small>dispositivo (<span class="etiqueta @s.Estado">@s.Estado</span>)</small></div>
+    <div class="tarjeta"><b>@s.Umbral.ToString("0.00")</b><small>umbral (@s.Unidad)</small></div>
+    <div class="tarjeta"><b>@(s.UltimoValor?.ToString("0.00") ?? "-")</b><small>ultimo valor</small></div>
+</div>
+
+<div class="panel">
+    <h2>Operaciones</h2>
+    <form method="post" asp-page-handler="Registrar" class="linea" style="margin-bottom:12px">
+        <input type="hidden" name="codigo" value="@s.Codigo" />
+        <label>Registrar lectura (@s.Unidad) <input name="valor" type="number" step="0.01" required /></label>
+        <button>Registrar (INSERT)</button>
+    </form>
+    <form method="post" asp-page-handler="Umbral" class="linea" style="margin-bottom:12px">
+        <input type="hidden" name="codigo" value="@s.Codigo" />
+        <label>Nuevo umbral <input name="umbral" type="number" step="0.01" required value="@s.Umbral.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" /></label>
+        <button>Actualizar (UPDATE)</button>
+    </form>
+    <form method="post" asp-page-handler="EliminarSensor" class="linea">
+        <input type="hidden" name="codigo" value="@s.Codigo" />
+        <button class="peligro" name="conLecturas" value="false">Eliminar sensor</button>
+        <button class="peligro" name="conLecturas" value="true">Eliminar con lecturas (transaccion)</button>
+    </form>
+</div>
+
+<div class="panel">
+    <h2>Ultimas 20 lecturas (consulta parametrizada con @@codigo y @@cuantas)</h2>
+    <table>
+        <tr><th>Id</th><th class="num">Valor</th><th>Fecha</th><th>Alerta</th><th></th></tr>
+        @foreach (var l in Model.Lecturas)
+        {
+            <tr>
+                <td>@l.Id</td>
+                <td class="num">@l.Valor.ToString("0.00")</td>
+                <td>@l.Fecha</td>
+                <td>@if (l.Severidad is not null) { <span class="etiqueta @l.Severidad">@l.Severidad</span> } else { <span>-</span> }</td>
+                <td>
+                    <form method="post" asp-page-handler="EliminarLectura">
+                        <input type="hidden" name="codigo" value="@s.Codigo" />
+                        <input type="hidden" name="id" value="@l.Id" />
+                        <button class="chico peligro">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

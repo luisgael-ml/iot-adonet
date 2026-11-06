@@ -1,0 +1,34 @@
+@page
+@model DispositivosModel
+@using System.Data
+@{ ViewData["Title"] = "Dispositivos"; }
+
+<h1>Dispositivos</h1>
+
+<div class="panel">
+    <h2>Modelo desconectado: DataAdapter.Fill → DataTable → DataAdapter.Update</h2>
+    <p>La tabla se carga en memoria y la conexion se cierra. Al guardar, solo las filas cuyo estado cambio
+       (RowState = Modified) se envian al servidor con el UPDATE que genera el CommandBuilder.</p>
+    <form method="post">
+        <table>
+            <tr><th>Codigo</th><th>Nombre</th><th>Ubicacion</th><th>Estado</th></tr>
+            @foreach (DataRow d in Model.Tabla.Rows)
+            {
+                var codigo = (string)d["codigo"];
+                var estado = (string)d["estado"];
+                <tr>
+                    <td>@codigo</td><td>@d["nombre"]</td><td>@d["ubicacion"]</td>
+                    <td>
+                        <select name="estado[@codigo]">
+                            @foreach (var e in new[] { "activo", "mantenimiento", "inactivo" })
+                            {
+                                <option selected="@(e == estado)">@e</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            }
+        </table>
+        <p><button>Guardar cambios (DataAdapter.Update)</button></p>
+    </form>
+</div>
